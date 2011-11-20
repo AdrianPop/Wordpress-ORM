@@ -6,6 +6,7 @@
   // test::get_where($where, $limit, $offset)
   // test::get_by($field, $value)
   // test::find(1), select *, where pk=1
+  
   // test::update($data, $where)
   // test::save($data), insert into table values $data
   // test::delete(1), delete from table where pk=1
@@ -35,7 +36,6 @@
     private $queries = array();
     private $num_rows = NULL;
     private $insert_id = NULL;
-
 
     private $select_param = array();
     private $where_param = array();
@@ -74,8 +74,7 @@
       else
         $query = sprintf($query, "*");
 
-      if(!empty($self->where_param))
-      {
+      if (!empty($self->where_param)) {
         $query .= " WHERE " . $self->where_param;
       }
 
@@ -119,6 +118,51 @@
       return self::get($limit, $offset);
     }
 
+    static function get_by($field = NULL, $value = NULL, $limit = NULL, $offset = NULL)
+    {
+      if (!empty($field) && !empty($value)) {
+
+        if(!is_numeric($value))
+          $value = "'" . $value . "'";
+
+        $where = array("`" . $field . "`", '=', $value);
+
+        self::$instance->where_param = implode(" ", $where);
+      }
+
+      return self::get($limit, $offset);
+    }
+
+    static function find($value = NULL)
+    {
+      if(!is_null($value))
+      {
+        if(!is_numeric($value))
+          $value = "'" . $value . "'";
+
+        $where = array("`" . self::pk() . "`", '=', $value);
+
+        self::$instance->where_param = implode(" ", $where);
+
+        return self::get();
+      }
+
+      return FALSE;
+    }
+
+    static function count_all()
+    {
+      $self = self::$instance;
+
+      $result = $self->db->get_var("SELECT COUNT(`" . $self::pk() ."`) FROM " . $self->table());
+
+      $self->add_query();
+      $self->num_rows = $self->db->num_rows;
+
+      return $result;
+    }
+
+
     static function last_query()
     {
       return end(self::$instance->queries);
@@ -143,12 +187,6 @@
     {
       return self::$instance->num_rows;
     }
-
-    static function timer()
-    {
-      return self::$instance->timer;
-    }
-
 
     private function add_query()
     {
