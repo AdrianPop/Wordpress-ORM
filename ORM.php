@@ -6,7 +6,7 @@
   // test::get_where($where, $limit, $offset)
   // test::get_by($field, $value)
   // test::find(1), select *, where pk=1
-  
+
   // test::update($data, $where)
   // test::save($data), insert into table values $data
   // test::delete(1), delete from table where pk=1
@@ -122,7 +122,7 @@
     {
       if (!empty($field) && !empty($value)) {
 
-        if(!is_numeric($value))
+        if (!is_numeric($value))
           $value = "'" . $value . "'";
 
         $where = array("`" . $field . "`", '=', $value);
@@ -135,9 +135,8 @@
 
     static function find($value = NULL)
     {
-      if(!is_null($value))
-      {
-        if(!is_numeric($value))
+      if (!is_null($value)) {
+        if (!is_numeric($value))
           $value = "'" . $value . "'";
 
         $where = array("`" . self::pk() . "`", '=', $value);
@@ -154,10 +153,22 @@
     {
       $self = self::$instance;
 
-      $result = $self->db->get_var("SELECT COUNT(`" . $self::pk() ."`) FROM " . $self->table());
+      $result = $self->db->get_var("SELECT COUNT(`" . $self::pk() . "`) FROM " . $self->table());
 
       $self->add_query();
       $self->num_rows = $self->db->num_rows;
+
+      return $result;
+    }
+
+    static function update($data = array(), $where)
+    {
+      $self = self::$instance;
+
+      $result = $self->db->update($self::table(), $data, $where);
+
+      $self->add_query();
+      $self->num_rows = $result;
 
       return $result;
     }
